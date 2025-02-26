@@ -6,27 +6,27 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.Date;
 
 @Entity
-@Table(name = "movies")
-public class Movie {
+@Table(name = "screenings")
+public class Screening {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
 
     @NotBlank
-    private String title;
+    private Date date;
 
     @NotBlank
-    private int duration;
+    private String startTime;
 
     @NotBlank
-    private String rating;
+    private String endTime;
 
     @NotBlank
-    private String synopsis;
+    @ManyToOne
+    private Movie movie;
 
-    @NotBlank
-    private String genre;
 
-    @NotBlank
-    private Date releaseDate;
+
+
 }

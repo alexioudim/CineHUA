@@ -22,6 +22,12 @@ public class User {
     @NotBlank
     private int phoneNumber;
 
+    @OneToOne
+    private Loyalty loyalty;
+
+    @ManyToOne
+    private Role role;
+
     public String getFirstName() {
         return firstName;
     }
