@@ -1,5 +1,5 @@
 ```bash
-docker run --name cinehua  \
+docker run --name cinehuadb  \
 -p 5432:5432 \
 -e POSTGRES_PASSWORD=cinehua123 \
 -e POSTGRES_USER=cinehua_user \
