@@ -20,5 +20,5 @@ public class SeatAvailability {
 }
 
 enum AvailabilityStatus {
-    AVAILABLE, RESERVED, SOLD
+    AVAILABLE, SELECTED, HOUSE, SOLD
 }
