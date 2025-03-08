@@ -26,6 +26,8 @@ public class Screening {
     @ManyToOne
     private Movie movie;
 
+    @ManyToOne
+    private Auditorium auditorium;
 
 
 
