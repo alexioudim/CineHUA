@@ -3,12 +3,12 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16
-    container_name: cinema_postgres
+    container_name: cinehua_postgres
     restart: always
     environment:
-      POSTGRES_USER: cinema_user
-      POSTGRES_PASSWORD: cinema_password
-      POSTGRES_DB: cinema_db
+      POSTGRES_USER: cinehua_user
+      POSTGRES_PASSWORD: cinehua123
+      POSTGRES_DB: cinehua_db
     ports:
       - "5432:5432"
     volumes:
@@ -16,7 +16,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: cinema_redis
+    container_name: cinehua_redis
     restart: always
     ports:
       - "6379:6379"
