@@ -22,6 +22,15 @@ public class User {
     @NotBlank
     private int phoneNumber;
 
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    private int passcode;
+
     @OneToOne
     private Loyalty loyalty;
 

@@ -12,6 +12,7 @@ public class Booking {
     private long bookingId;
 
     private Date issueDate;
+
     private float totalPrice;
 
     @ManyToOne
