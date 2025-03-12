@@ -2,6 +2,7 @@ package gr.dit.hua.CineHua.service;
 
 import gr.dit.hua.CineHua.entity.Movie;
 import gr.dit.hua.CineHua.repository.MovieRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ public class MovieService {
     @Autowired
     private MovieRepository movieRepository;
 
+    @Transactional
     public Movie saveMovie(Movie movie) {
         movieRepository.save(movie);
 

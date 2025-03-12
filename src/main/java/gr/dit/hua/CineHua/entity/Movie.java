@@ -1,5 +1,7 @@
 package gr.dit.hua.CineHua.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -7,30 +9,41 @@ import java.util.Date;
 
 @Entity
 @Table(name = "movies")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @JsonProperty("Title")
     private String title;
 
-    private int duration;
+    @JsonProperty("Runtime")
+    private String duration;
 
+    @JsonProperty("Rated")
     private String rating;
 
+    @JsonProperty("Plot")
     private String synopsis;
 
+    @JsonProperty("Genre")
     private String genre;
 
-    private Date releaseDate;
+    @JsonProperty("Released")
+    private String releaseDate;
 
-    public Movie(String title, int duration, String rating, String synopsis, String genre, Date releaseDate) {
+    public Movie(String title, String duration, String rating, String synopsis, String genre, String releaseDate) {
         this.title = title;
         this.duration = duration;
         this.rating = rating;
         this.synopsis = synopsis;
         this.genre = genre;
         this.releaseDate = releaseDate;
+    }
+
+    public Movie() {
+
     }
 
     public long getId() {
@@ -41,11 +54,11 @@ public class Movie {
         this.id = id;
     }
 
-    public Date getReleaseDate() {
+    public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
 
@@ -73,11 +86,11 @@ public class Movie {
         this.rating = rating;
     }
 
-    public int getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 
