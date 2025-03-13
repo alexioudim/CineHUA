@@ -6,23 +6,15 @@ import jakarta.persistence.*;
 public class Seat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long seatId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long seat_id;
 
     private String row;
     private int column;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomId", nullable = false)
     private Auditorium auditorium;
-
-    public long getSeatId() {
-        return seatId;
-    }
-
-    public void setSeatId(long seatId) {
-        this.seatId = seatId;
-    }
 
     public String getRow() {
         return row;

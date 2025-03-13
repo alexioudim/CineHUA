@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class Loyalty {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long loyalty_id;
 
     private String loyaltyType;
     private float discountPercentage;

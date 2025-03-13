@@ -12,8 +12,8 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Movie {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long movie_id;
 
     @JsonProperty("Title")
     private String title;
@@ -33,25 +33,8 @@ public class Movie {
     @JsonProperty("Released")
     private String releaseDate;
 
-    public Movie(String title, String duration, String rating, String synopsis, String genre, String releaseDate) {
-        this.title = title;
-        this.duration = duration;
-        this.rating = rating;
-        this.synopsis = synopsis;
-        this.genre = genre;
-        this.releaseDate = releaseDate;
-    }
-
     public Movie() {
 
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getReleaseDate() {

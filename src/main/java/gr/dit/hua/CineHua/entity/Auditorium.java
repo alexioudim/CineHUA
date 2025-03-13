@@ -8,23 +8,14 @@ import java.util.List;
 public class Auditorium {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long roomId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long auditorium_id;
 
     private int capacity;
-
     private String name;
 
-    @OneToMany(mappedBy = "auditorium")
+    @OneToMany(mappedBy = "auditorium", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Seat> seats;
-
-    public Long getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(Long roomId) {
-        this.roomId = roomId;
-    }
 
     public int getCapacity() {
         return capacity;

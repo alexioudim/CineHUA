@@ -6,16 +6,18 @@ import org.springframework.boot.availability.AvailabilityState;
 @Entity
 public class SeatAvailability {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long availabilityId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long availability_id;
 
     @Enumerated(EnumType.STRING)
     private AvailabilityStatus availability;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
 }
 

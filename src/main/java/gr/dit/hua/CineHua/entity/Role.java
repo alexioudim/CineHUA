@@ -8,7 +8,7 @@ import java.util.List;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long role_id;
     private String name;
 
     @OneToMany(mappedBy = "role")

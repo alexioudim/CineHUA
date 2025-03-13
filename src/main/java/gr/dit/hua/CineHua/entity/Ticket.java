@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long ticketId;
+    private Long ticket_id;
 
     private float price;
 

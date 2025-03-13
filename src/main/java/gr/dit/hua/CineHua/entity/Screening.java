@@ -10,8 +10,8 @@ import java.util.Date;
 public class Screening {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long screeningId;
 
     @NotBlank
     private Date date;
@@ -23,10 +23,12 @@ public class Screening {
     private String endTime;
 
     @NotBlank
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "auditorium_id", nullable = false)
     private Auditorium auditorium;
 
 

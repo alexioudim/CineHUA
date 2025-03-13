@@ -9,7 +9,7 @@ import java.util.List;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long bookingId;
+    private long booking_id;
 
     private Date issueDate;
 
