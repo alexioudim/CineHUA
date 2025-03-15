@@ -2,6 +2,7 @@ package gr.dit.hua.CineHua.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,7 +16,7 @@ public class Auditorium {
     private String name;
 
     @OneToMany(mappedBy = "auditorium", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Seat> seats;
+    private List<Seat> seats = new ArrayList<>();
 
     public int getCapacity() {
         return capacity;

@@ -12,8 +12,8 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Movie {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long movie_id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
 
     @JsonProperty("Title")
     private String title;
