@@ -7,10 +7,10 @@ import jakarta.persistence.*;
 public class Seat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long seat_id;
 
-    private String seat_row;
+    private char seat_row;
     private int seat_column;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -20,11 +20,11 @@ public class Seat {
     public Seat() {
     }
 
-    public String getRow() {
+    public char getRow() {
         return seat_row;
     }
 
-    public void setRow(String row) {
+    public void setRow(char seat_row) {
         this.seat_row = seat_row;
     }
 
@@ -32,7 +32,7 @@ public class Seat {
         return seat_column;
     }
 
-    public void setColumn(int column) {
+    public void setColumn(int seat_column) {
         this.seat_column = seat_column;
     }
 

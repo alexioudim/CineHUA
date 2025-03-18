@@ -17,8 +17,6 @@ public class MovieController {
 
     @Autowired
     private MovieService movieService;
-    @Autowired
-    private MovieRepository movieRepository;
 
     @PostMapping("/new")
     public Movie createMovie(@RequestBody Movie newMovie) {
@@ -37,7 +35,7 @@ public class MovieController {
             ObjectMapper objectMapper = new ObjectMapper();
             Movie newMovie = objectMapper.readValue(result, Movie.class);
 
-            movieRepository.save(newMovie);
+            movieService.saveMovie(newMovie);
 
             return ResponseEntity.ok("Movie saved successfully: " + newMovie.getTitle());
 
