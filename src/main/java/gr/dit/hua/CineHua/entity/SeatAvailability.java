@@ -19,8 +19,34 @@ public class SeatAvailability {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
+
+    public SeatAvailability() {
+    }
+
+    public AvailabilityStatus getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(AvailabilityStatus availability) {
+        this.availability = availability;
+    }
+
+    public Seat getSeat() {
+        return seat;
+    }
+
+    public void setSeat(Seat seat) {
+        this.seat = seat;
+    }
+
+    public Screening getScreening() {
+        return screening;
+    }
+
+    public void setScreening(Screening screening) {
+        this.screening = screening;
+    }
 }
 
-enum AvailabilityStatus {
-    AVAILABLE, SELECTED, HOUSE, SOLD
-}
+
+

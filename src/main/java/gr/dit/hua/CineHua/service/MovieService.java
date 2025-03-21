@@ -13,6 +13,11 @@ public class MovieService {
     private MovieRepository movieRepository;
 
     @Transactional
+    public Movie findById(long id) {
+        return movieRepository.findById(id);
+    }
+
+    @Transactional
     public Movie saveMovie(Movie movie) {
         movieRepository.save(movie);
 

@@ -21,9 +21,9 @@ public class AuditoriumController {
     public ResponseEntity<String> createAuditorium() {
 
         Auditorium auditorium = new Auditorium();
-        auditorium.setName("Test Room");
-        auditorium.setRows(8);
-        auditorium.setColumns(10);
+        auditorium.setName("Test Room 2");
+        auditorium.setRows(13);
+        auditorium.setColumns(12);
 
         try {
             auditoriumService.createAuditorium(auditorium);

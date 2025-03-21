@@ -21,6 +21,11 @@ public class AuditoriumService {
     private SeatRepository seatRepository;
 
     @Transactional
+    public Auditorium findAuditoriumById(long id) {
+        return auditoriumRepository.findById(id);
+    }
+
+    @Transactional
     public void createAuditorium(Auditorium auditorium) {
         int rows = auditorium.getRows();
         int columns = auditorium.getColumns();

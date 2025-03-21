@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
-    Seat findByAuditorium(Auditorium auditorium);
-    List<Seat> findAllByAuditorium(Auditorium auditorium);
+    List<Seat> findByAuditorium(Auditorium auditorium);
 }
