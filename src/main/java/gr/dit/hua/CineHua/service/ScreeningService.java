@@ -16,7 +16,10 @@ public class ScreeningService {
 
     @Autowired
     private ScreeningRepository screeningRepository;
+
+    @Autowired
     private SeatRepository seatRepository;
+
     @Autowired
     private SeatAvailabilityRepository seatAvailabilityRepository;
 

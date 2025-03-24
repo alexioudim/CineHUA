@@ -2,6 +2,7 @@ package gr.dit.hua.CineHua.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class ScreeningRequest {
@@ -13,7 +14,7 @@ public class ScreeningRequest {
     private long auditorium_id;
 
     @NotNull
-    private Date date;
+    private LocalDate date;
 
     @NotNull
     private String startTime;
@@ -40,11 +41,11 @@ public class ScreeningRequest {
         this.movie_id = movie_id;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

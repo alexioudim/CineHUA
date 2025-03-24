@@ -55,6 +55,11 @@ public class AuditoriumService {
         auditorium.setSeats(seats);
     }
 
+    @Transactional
+    public void deleteAuditorium(long id) {
+        auditoriumRepository.deleteById(id);
+    }
+
 
 
 

@@ -2,7 +2,9 @@ package gr.dit.hua.CineHua.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -13,8 +15,8 @@ public class Screening {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long screeningId;
 
-    @NotBlank
-    private Date date;
+    @NotNull
+    private LocalDate date;
 
     @NotBlank
     private String startTime;
@@ -22,7 +24,7 @@ public class Screening {
     @NotBlank
     private String endTime;
 
-    @NotBlank
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
@@ -34,11 +36,11 @@ public class Screening {
     public Screening() {
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
