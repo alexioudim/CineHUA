@@ -9,11 +9,10 @@ import gr.dit.hua.CineHua.service.MovieService;
 import gr.dit.hua.CineHua.service.ScreeningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/screening")
@@ -33,17 +32,26 @@ public class ScreeningController {
         Movie movie = movieService.findById(screeningDTO.getMovie_id());
         Auditorium auditorium = auditoriumService.findAuditoriumById(screeningDTO.getAuditorium_id());
 
-        // Calculate EndTime should be added
+        LocalTime startTime = LocalTime.parse(screeningDTO.getStartTime());
 
         screening.setMovie(movie);
         screening.setAuditorium(auditorium);
-        screening.setStartTime(screeningDTO.getStartTime());
-        screening.setEndTime(screeningDTO.getEndTime());
+        screening.setStartTime(startTime);
         screening.setDate(screeningDTO.getDate());
 
         try {
             screeningService.createScreening(screening);
-            return ResponseEntity.ok().body("Created screening for movie :" + screening.getMovie().getTitle() + "for " + screening.getDate() + " " + screening.getStartTime());
+            return ResponseEntity.ok().body("Created screening for movie : " + screening.getMovie().getTitle() + "for " + screening.getDate() + " " + screening.getStartTime());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteScreening(@PathVariable Long id) {
+        try {
+            screeningService.deleteScreening(id);
+            return ResponseEntity.ok("Screening deleted");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
         }

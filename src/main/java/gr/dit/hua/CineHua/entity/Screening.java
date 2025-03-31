@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "screenings")
@@ -19,10 +21,10 @@ public class Screening {
     @NotNull
     private LocalDate date;
 
-    @NotBlank
+    @NotNull
     private LocalTime startTime;
 
-    @NotBlank
+    @NotNull
     private LocalTime endTime;
 
     @NotNull
@@ -33,6 +35,10 @@ public class Screening {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "auditorium_id", nullable = false)
     private Auditorium auditorium;
+
+    @OneToMany(mappedBy = "screening", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<SeatAvailability> seatAvailabilities = new ArrayList<>();
+
 
     public Screening() {
     }
@@ -75,5 +81,13 @@ public class Screening {
 
     public void setAuditorium(Auditorium auditorium) {
         this.auditorium = auditorium;
+    }
+
+    public List<SeatAvailability> getSeatAvailabilities() {
+        return seatAvailabilities;
+    }
+
+    public void setSeatAvailabilities(List<SeatAvailability> seatAvailabilities) {
+        this.seatAvailabilities = seatAvailabilities;
     }
 }

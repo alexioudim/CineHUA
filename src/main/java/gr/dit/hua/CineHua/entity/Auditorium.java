@@ -9,7 +9,7 @@ import java.util.List;
 public class Auditorium {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long auditorium_id;
 
     private int capacity;

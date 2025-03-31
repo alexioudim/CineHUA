@@ -17,7 +17,7 @@ public class ScreeningRequest {
     private LocalDate date;
 
     @NotNull
-    private LocalTime startTime;
+    private String startTime;
 
     public ScreeningRequest() {
     }
@@ -46,11 +46,11 @@ public class ScreeningRequest {
         this.date = date;
     }
 
-    public LocalTime getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalTime startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 

@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class Seat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long seat_id;
 
     private char seat_row;

@@ -21,9 +21,6 @@ public class ScreeningService {
     @Autowired
     private SeatRepository seatRepository;
 
-    @Autowired
-    private SeatAvailabilityRepository seatAvailabilityRepository;
-
     @Transactional
     public void createScreening(Screening screening){
         Auditorium auditorium = screening.getAuditorium();
@@ -31,10 +28,8 @@ public class ScreeningService {
 
         String duration = screening.getMovie().getDuration();
         int runtime = extractMinutes(duration);
-
         LocalTime startTime = screening.getStartTime();
         LocalTime endTime = startTime.plusMinutes(runtime);
-
         screening.setEndTime(endTime);
 
         List<SeatAvailability> availabilities = new ArrayList<>();
@@ -47,14 +42,18 @@ public class ScreeningService {
             availabilities.add(availability);
         }
 
+        screening.setSeatAvailabilities(availabilities);
         screeningRepository.save(screening);
-        seatAvailabilityRepository.saveAll(availabilities);
     }
 
     private int extractMinutes(String duration){
-        if (!duration.matches("\\d+\\s*mins")) {
+        if (!duration.matches("\\d+\\s*min")) {
             throw new IllegalArgumentException("Invalid movie duration format: " + duration);
         }
         return Integer.parseInt(duration.replaceAll("[^0-9]", ""));
+    }
+
+    public void deleteScreening(long id) {
+        screeningRepository.deleteById(id);
     }
 }

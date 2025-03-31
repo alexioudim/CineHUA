@@ -7,7 +7,7 @@ import java.util.Date;
 @Entity
 public class CreditNote {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long creditNote_id;
 
     private float balance;
