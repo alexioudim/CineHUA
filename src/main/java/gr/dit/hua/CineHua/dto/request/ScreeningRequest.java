@@ -3,7 +3,7 @@ package gr.dit.hua.CineHua.dto.request;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalTime;
 
 public class ScreeningRequest {
 
@@ -17,10 +17,7 @@ public class ScreeningRequest {
     private LocalDate date;
 
     @NotNull
-    private String startTime;
-
-    @NotNull
-    private String endTime;
+    private LocalTime startTime;
 
     public ScreeningRequest() {
     }
@@ -49,19 +46,12 @@ public class ScreeningRequest {
         this.date = date;
     }
 
-    public String getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
-    }
 }

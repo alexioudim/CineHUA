@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,14 @@ public class ScreeningService {
         Auditorium auditorium = screening.getAuditorium();
         List<Seat> seats = seatRepository.findByAuditorium(auditorium);
 
+        String duration = screening.getMovie().getDuration();
+        int runtime = extractMinutes(duration);
+
+        LocalTime startTime = screening.getStartTime();
+        LocalTime endTime = startTime.plusMinutes(runtime);
+
+        screening.setEndTime(endTime);
+
         List<SeatAvailability> availabilities = new ArrayList<>();
 
         for (Seat seat : seats) {
@@ -40,5 +49,12 @@ public class ScreeningService {
 
         screeningRepository.save(screening);
         seatAvailabilityRepository.saveAll(availabilities);
+    }
+
+    private int extractMinutes(String duration){
+        if (!duration.matches("\\d+\\s*mins")) {
+            throw new IllegalArgumentException("Invalid movie duration format: " + duration);
+        }
+        return Integer.parseInt(duration.replaceAll("[^0-9]", ""));
     }
 }
