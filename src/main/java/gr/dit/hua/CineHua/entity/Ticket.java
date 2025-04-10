@@ -2,27 +2,70 @@ package gr.dit.hua.CineHua.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ticket_id;
 
-    private float price;
+    private BigDecimal price;
+
+    @Column(unique = true, nullable = false)
+    private String ticketCode;
 
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @ManyToOne
-    private Screening screening;
+    @OneToOne
+    @JoinColumn(name = "seat_availability_id", unique = true)
+    private SeatAvailability seatAvailability;
 
-    @ManyToOne
-    private Seat seat;
-
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Booking booking;
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getTicketCode() {
+        return ticketCode;
+    }
+
+    public void setTicketCode(String ticketCode) {
+        this.ticketCode = ticketCode;
+    }
+
+    public TicketStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TicketStatus status) {
+        this.status = status;
+    }
+
+    public SeatAvailability getSeatAvailability() {
+        return seatAvailability;
+    }
+
+    public void setSeatAvailability(SeatAvailability seatAvailability) {
+        this.seatAvailability = seatAvailability;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
+    }
 }
 
 enum TicketStatus {
-    AVAILABLE, BOOKED
+    PENDING, COLLECTED, UNCOLLECTED, CANCELLED
 }
