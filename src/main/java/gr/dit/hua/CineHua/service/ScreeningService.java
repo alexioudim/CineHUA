@@ -56,4 +56,10 @@ public class ScreeningService {
     public void deleteScreening(long id) {
         screeningRepository.deleteById(id);
     }
+
+    public List<SeatAvailability> getSeatAvailabilities(Long screening_id){
+        Screening screening = screeningRepository.findById(screening_id).orElse(null);
+        assert screening != null;
+        return screening.getSeatAvailabilities();
+    }
 }

@@ -1,9 +1,7 @@
 package gr.dit.hua.CineHua.controller;
 
 import gr.dit.hua.CineHua.dto.request.ScreeningRequest;
-import gr.dit.hua.CineHua.entity.Auditorium;
-import gr.dit.hua.CineHua.entity.Movie;
-import gr.dit.hua.CineHua.entity.Screening;
+import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.service.AuditoriumService;
 import gr.dit.hua.CineHua.service.MovieService;
 import gr.dit.hua.CineHua.service.ScreeningService;
@@ -13,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/screening")
@@ -41,7 +41,7 @@ public class ScreeningController {
 
         try {
             screeningService.createScreening(screening);
-            return ResponseEntity.ok().body("Created screening for movie : " + screening.getMovie().getTitle() + "for " + screening.getDate() + " " + screening.getStartTime());
+            return ResponseEntity.ok().body("Created screening for movie : " + screening.getMovie().getTitle() + " for " + screening.getDate() + " " + screening.getStartTime());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
         }
@@ -55,6 +55,11 @@ public class ScreeningController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}")
+    public List<SeatAvailability> getSeatAvailability(@PathVariable Long id){
+        return screeningService.getSeatAvailabilities(id);
     }
 
 }

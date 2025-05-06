@@ -12,9 +12,6 @@ public class Ticket {
 
     private BigDecimal price;
 
-    @Column(unique = true, nullable = false)
-    private String ticketCode;
-
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
@@ -31,14 +28,6 @@ public class Ticket {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-
-    public String getTicketCode() {
-        return ticketCode;
-    }
-
-    public void setTicketCode(String ticketCode) {
-        this.ticketCode = ticketCode;
     }
 
     public TicketStatus getStatus() {
@@ -66,6 +55,3 @@ public class Ticket {
     }
 }
 
-enum TicketStatus {
-    PENDING, COLLECTED, UNCOLLECTED, CANCELLED
-}

@@ -25,7 +25,7 @@ public class AuditoriumController {
 
         try {
             auditoriumService.createAuditorium(auditorium);
-            return ResponseEntity.ok("Auditorium created:" + auditorium.getName());
+            return ResponseEntity.ok("Auditorium created: " + auditorium.getName());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
         }

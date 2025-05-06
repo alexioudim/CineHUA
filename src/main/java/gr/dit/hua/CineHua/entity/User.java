@@ -3,6 +3,7 @@ package gr.dit.hua.CineHua.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "users")
@@ -19,16 +20,13 @@ public class User {
     @Email
     @NotBlank
     private String email;
-    @NotBlank
+    @NotNull
     private int phoneNumber;
 
-    @NotBlank
     private String username;
 
-    @NotBlank
     private String password;
 
-    @NotBlank
     private int passcode;
 
     @OneToOne

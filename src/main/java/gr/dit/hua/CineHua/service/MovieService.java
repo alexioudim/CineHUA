@@ -24,6 +24,12 @@ public class MovieService {
         return movie;
     }
 
+    @Transactional
+    public void deleteMovie(long id) {
+        Movie movie = movieRepository.findById(id);
+        movieRepository.delete(movie);
+    }
+
 
 
 

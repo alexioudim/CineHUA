@@ -18,11 +18,6 @@ public class MovieController {
     @Autowired
     private MovieService movieService;
 
-    @PostMapping("/new")
-    public Movie createMovie(@RequestBody Movie newMovie) {
-        return movieService.saveMovie(newMovie);
-    }
-
     @PostMapping("/new/{imdb_id}")
     public ResponseEntity<String> createMovie(@PathVariable String imdb_id) {
         String uri = "http://www.omdbapi.com/?i=";
@@ -43,5 +38,15 @@ public class MovieController {
             return ResponseEntity.badRequest().body("Error processing movie: "+ e.getMessage());
         }
 
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteScreening(@PathVariable Long id) {
+        try {
+            movieService.deleteMovie(id);
+            return ResponseEntity.ok("Movie deleted");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
+        }
     }
 }
