@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -20,8 +21,10 @@ public class User {
     @Email
     @NotBlank
     private String email;
+
     @NotNull
-    private int phoneNumber;
+    @Size(min=10, max=10)
+    private long phoneNumber;
 
     private String username;
 
@@ -59,11 +62,11 @@ public class User {
         this.email = email;
     }
 
-    public int getPhoneNumber() {
+    public long getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(long phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 }

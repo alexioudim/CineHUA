@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MovieService {
 
@@ -18,10 +20,14 @@ public class MovieService {
     }
 
     @Transactional
-    public Movie saveMovie(Movie movie) {
+    public List<Movie> findAllMovies() {
+        return movieRepository.findAll();
+    }
+
+    @Transactional
+    public void saveMovie(Movie movie) {
         movieRepository.save(movie);
 
-        return movie;
     }
 
     @Transactional
@@ -29,7 +35,6 @@ public class MovieService {
         Movie movie = movieRepository.findById(id);
         movieRepository.delete(movie);
     }
-
 
 
 

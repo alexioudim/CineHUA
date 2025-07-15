@@ -53,5 +53,13 @@ public class Ticket {
     public void setBooking(Booking booking) {
         this.booking = booking;
     }
+
+    public Long getTicket_id() {
+        return ticket_id;
+    }
+
+    public void setTicket_id(Long ticket_id) {
+        this.ticket_id = ticket_id;
+    }
 }
 

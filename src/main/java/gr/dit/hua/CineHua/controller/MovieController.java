@@ -11,12 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
+import java.util.List;
+
 @RestController
 @RequestMapping("/movie")
 public class MovieController {
 
     @Autowired
     private MovieService movieService;
+
+    @GetMapping("/view")
+    public List<Movie> viewMovies() {
+        return movieService.findAllMovies();
+    }
 
     @PostMapping("/new/{imdb_id}")
     public ResponseEntity<String> createMovie(@PathVariable String imdb_id) {

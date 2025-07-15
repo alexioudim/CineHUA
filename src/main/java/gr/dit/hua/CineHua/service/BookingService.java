@@ -1,6 +1,7 @@
 package gr.dit.hua.CineHua.service;
 
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
+import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,9 +27,11 @@ public class BookingService{
     private UserRepository userRepository;
     @Autowired
     private ScreeningRepository screeningRepository;
+    @Autowired
+    private CreditNoteRepository creditNoteRepository;
 
-    private static final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    private static final int CODE_LENGTH = 6;
+    @Autowired
+    private TicketRepository ticketRepository;
 
 
     @Transactional
@@ -78,12 +81,51 @@ public class BookingService{
     }
 
     @Transactional
-    public List<Ticket> getTicketsByBooking (String bookingCode) {
+    public List<TicketRequest> getTicketsByBooking (String bookingCode) {
         Booking booking = bookingRepository.findByBookingCode(bookingCode);
-        return booking.getTickets();
+        List<Ticket> tickets = booking.getTickets();
+        List<TicketRequest> ticketRequests = ticketsToDTO(tickets);
+        return ticketRequests;
     }
 
-    public String generateBookingCode() {
+    @Transactional
+    public CreditNote cancelTickets(String bookingCode, long user_id) {
+        Booking booking = bookingRepository.findByBookingCode(bookingCode);
+        List<Ticket> tickets = ticketRepository.findTicketsByBooking(booking);
+
+        if (tickets.isEmpty()) {
+            throw new EntityNotFoundException("No tickets found.");
+        }
+
+        BigDecimal totalCost = BigDecimal.ZERO;
+        for (Ticket ticket : tickets) {
+            if (ticket.getStatus() == TicketStatus.PENDING) {
+                ticket.setStatus(TicketStatus.CANCELLED);
+                totalCost = totalCost.add(ticket.getPrice());
+
+                SeatAvailability availability = ticket.getSeatAvailability();
+                availability.setAvailability(AvailabilityStatus.AVAILABLE);
+                seatAvailabilityRepository.save(availability);
+            }
+        }
+
+        if (totalCost.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalStateException("No active tickets found");
+        } else {
+            CreditNote creditNote = new CreditNote(totalCost);
+            creditNote.setIssuer(userRepository.findById(user_id));
+            creditNoteRepository.save(creditNote);
+            return creditNote;
+        }
+
+
+    }
+
+    private String generateBookingCode() {
+
+        final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        final int CODE_LENGTH = 6;
+
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder(CODE_LENGTH);
 
@@ -103,4 +145,16 @@ public class BookingService{
         return totalPrice;
     }
 
+    public List<TicketRequest> ticketsToDTO(List<Ticket> tickets) {
+        List<TicketRequest> ticketRequests = new ArrayList<>();
+        for (Ticket i : tickets) {
+            TicketRequest ticketRequest = new TicketRequest();
+            ticketRequest.setTicketId(i.getTicket_id());
+            ticketRequest.setPrice(i.getPrice());
+            ticketRequest.setStatus(i.getStatus());
+            ticketRequests.add(ticketRequest);
+        }
+
+        return ticketRequests;
+    }
 }
