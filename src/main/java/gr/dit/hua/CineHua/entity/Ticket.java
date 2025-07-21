@@ -16,7 +16,7 @@ public class Ticket {
     private TicketStatus status;
 
     @OneToOne
-    @JoinColumn(name = "seat_availability_id", unique = true)
+    @JoinColumn(name = "seat_availability_id")
     private SeatAvailability seatAvailability;
 
     @ManyToOne(optional = false)
