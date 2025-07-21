@@ -80,7 +80,7 @@ public class BookingService{
 
         String bookingCode;
         do {
-            bookingCode = generateBookingCode();
+            bookingCode = generateCode(true);
         } while (bookingRepository.existsByBookingCode(bookingCode));
 
         booking.setBookingCode(bookingCode);
@@ -123,8 +123,15 @@ public class BookingService{
         if (totalCost.compareTo(BigDecimal.ZERO) == 0) {
             throw new IllegalStateException("No active tickets found");
         } else {
-            CreditNote creditNote = new CreditNote(totalCost);
+            CreditNote creditNote = new CreditNote();
+            creditNote.setBalance(totalCost);
+            creditNote.setIssueDate(LocalDateTime.now());
+            creditNote.setExpirationDate(creditNote.getIssueDate().plusMonths(1));
+            creditNote.setStatus(CreditNoteStatus.ACTIVE);
+            creditNote.setCode(generateCode(false));
             creditNote.setIssuer(userRepository.findById(user_id));
+            String qrCode = generateQrBase64(creditNote.getCode());
+            creditNote.setQrCode(qrCode);
             creditNoteRepository.save(creditNote);
             return creditNote;
         }
@@ -132,10 +139,19 @@ public class BookingService{
 
     }
 
-    private String generateBookingCode() {
+    private String generateCode(boolean flag) {
 
-        final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        final int CODE_LENGTH = 6;
+        String CHAR_POOL;
+        int CODE_LENGTH;
+
+        //True = Booking Code, False = Credit Note Code
+        if (flag) {
+            CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            CODE_LENGTH = 6;
+        } else {
+            CHAR_POOL = "0123456789";
+            CODE_LENGTH = 12;
+        }
 
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder(CODE_LENGTH);

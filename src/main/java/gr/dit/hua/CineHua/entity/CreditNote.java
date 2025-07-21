@@ -1,11 +1,11 @@
 package gr.dit.hua.CineHua.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class CreditNote {
@@ -16,33 +16,26 @@ public class CreditNote {
     @Column(nullable = false, unique = true)
     private String code;
 
+    @NotNull
     private BigDecimal balance;
 
+    @NotNull
     private LocalDateTime issueDate;
 
+    @NotNull
     private LocalDateTime expirationDate;
 
     @Enumerated(EnumType.STRING)
     private CreditNoteStatus status;
 
+    @Transient
+    private String qrCode;
+
     @ManyToOne(optional = false)
     private User issuer;
 
-    public CreditNote(BigDecimal balance) {
-        this.balance = balance;
-    }
-
     public CreditNote() {
     }
-
-    @PrePersist
-    public void onCreate() {
-        this.issueDate = LocalDateTime.now();
-        this.expirationDate = issueDate.plusMonths(1);
-        this.status = CreditNoteStatus.ACTIVE;
-        this.code = generateCreditNoteCode();
-    }
-
 
     public Long getCreditNote_id() {
         return creditNote_id;
@@ -92,6 +85,14 @@ public class CreditNote {
         this.status = status;
     }
 
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
     public User getIssuer() {
         return issuer;
     }
@@ -100,25 +101,6 @@ public class CreditNote {
         this.issuer = issuer;
     }
 
-    private String generateCreditNoteCode() {
-
-        final String CHAR_POOL = "0123456789";
-        final int CODE_LENGTH = 12;
-
-        SecureRandom random = new SecureRandom();
-        StringBuilder code = new StringBuilder(CODE_LENGTH);
-
-        for (int i = 0; i < CODE_LENGTH; i++) {
-            int index = random.nextInt(CHAR_POOL.length());
-            code.append(CHAR_POOL.charAt(index));
-        }
-
-        return code.toString();
-    }
-
 }
 
 
-enum CreditNoteStatus {
-    ACTIVE, EXPIRED, USED
-}

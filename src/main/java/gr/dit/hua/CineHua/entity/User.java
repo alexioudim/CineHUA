@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.NumberFormat;
 
 @Entity
 @Table(name = "users")
@@ -23,7 +25,6 @@ public class User {
     private String email;
 
     @NotNull
-    @Size(min=10, max=10)
     private long phoneNumber;
 
     private String username;

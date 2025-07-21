@@ -3,6 +3,7 @@ package gr.dit.hua.CineHua.controller;
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.dto.response.BookingResponse;
+import gr.dit.hua.CineHua.dto.response.CreditNoteResponse;
 import gr.dit.hua.CineHua.entity.Booking;
 import gr.dit.hua.CineHua.entity.CreditNote;
 import gr.dit.hua.CineHua.entity.SeatAvailability;
@@ -20,7 +21,7 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
-    List<SeatAvailability> cart = new ArrayList();
+    List<SeatAvailability> cart = new ArrayList<>();
 
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
@@ -39,7 +40,8 @@ public class BookingController {
     }
 
     @PostMapping("/cancel/{bookingCode}")
-    public CreditNote cancelBooking (@PathVariable String bookingCode, long user_id) {
-        return bookingService.cancelTickets(bookingCode, user_id);
+    public CreditNoteResponse cancelBooking (@PathVariable String bookingCode, @RequestParam long user_id) {
+        CreditNote creditNote = bookingService.cancelTickets(bookingCode, user_id);
+        return new CreditNoteResponse(creditNote.getCode(), creditNote.getBalance(), creditNote.getIssueDate(), creditNote.getExpirationDate(), creditNote.getQrCode());
     }
 }

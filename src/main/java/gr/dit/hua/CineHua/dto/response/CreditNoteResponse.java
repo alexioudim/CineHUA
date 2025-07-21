@@ -13,27 +13,30 @@ public class CreditNoteResponse {
 
     private LocalDateTime expirationDate;
 
-    public CreditNoteResponse(String code, BigDecimal balance, LocalDateTime issueDate, LocalDateTime expirationDate) {
+    private String qrCode;
+
+    public CreditNoteResponse(String code, BigDecimal balance, LocalDateTime issueDate, LocalDateTime expirationDate, String qrCode) {
         this.code = code;
         this.balance = balance;
         this.issueDate = issueDate;
         this.expirationDate = expirationDate;
+        this.qrCode = qrCode;
     }
 
-    public String getCode() {
-        return code;
+    public String getQrCode() {
+        return qrCode;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
     }
 
-    public BigDecimal getBalance() {
-        return balance;
+    public LocalDateTime getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
+    public void setExpirationDate(LocalDateTime expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public LocalDateTime getIssueDate() {
@@ -44,11 +47,19 @@ public class CreditNoteResponse {
         this.issueDate = issueDate;
     }
 
-    public LocalDateTime getExpirationDate() {
-        return expirationDate;
+    public BigDecimal getBalance() {
+        return balance;
     }
 
-    public void setExpirationDate(LocalDateTime expirationDate) {
-        this.expirationDate = expirationDate;
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }
