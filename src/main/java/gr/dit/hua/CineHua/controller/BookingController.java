@@ -2,6 +2,7 @@ package gr.dit.hua.CineHua.controller;
 
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
+import gr.dit.hua.CineHua.dto.response.BookingResponse;
 import gr.dit.hua.CineHua.entity.Booking;
 import gr.dit.hua.CineHua.entity.CreditNote;
 import gr.dit.hua.CineHua.entity.SeatAvailability;
@@ -10,6 +11,7 @@ import gr.dit.hua.CineHua.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +27,10 @@ public class BookingController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<String> createBooking (@RequestBody BookingRequest bookingRequest) {
-        try {
-            Booking booking = bookingService.createBookingFromCart(bookingRequest);
-            return ResponseEntity.ok("Booking " + booking.getBookingCode() + " created successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
-        }
+    public BookingResponse createBooking (@RequestBody BookingRequest bookingRequest) throws IOException {
+
+        Booking booking = bookingService.createBookingFromCart(bookingRequest);
+        return new BookingResponse(booking.getIssueDate(), booking.getTotalPrice(), booking.getBookingCode(), booking.getQrCode());
     }
 
     @GetMapping("/{bookingCode}/tickets")

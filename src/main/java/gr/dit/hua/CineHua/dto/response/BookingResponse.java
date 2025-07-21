@@ -1,34 +1,28 @@
-package gr.dit.hua.CineHua.entity;
+package gr.dit.hua.CineHua.dto.response;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Transient;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-@Entity
-public class Booking {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long booking_id;
+public class BookingResponse {
 
     private LocalDateTime issueDate;
 
     private BigDecimal totalPrice;
 
-    @Column(unique = true, nullable = false, length = 20)
     private String bookingCode;
 
-    @Transient
     private String qrCode;
 
-    @ManyToOne
-    private User issuer;
-
-    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Ticket> tickets = new ArrayList<>();
+    public BookingResponse(LocalDateTime issueDate, BigDecimal totalPrice, String bookingCode, String qrCode) {
+        this.issueDate = issueDate;
+        this.totalPrice = totalPrice;
+        this.bookingCode = bookingCode;
+        this.qrCode = qrCode;
+    }
 
     public LocalDateTime getIssueDate() {
         return issueDate;
@@ -60,21 +54,5 @@ public class Booking {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
-    }
-
-    public User getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(User issuer) {
-        this.issuer = issuer;
-    }
-
-    public List<Ticket> getTickets() {
-        return tickets;
-    }
-
-    public void setTickets(List<Ticket> tickets) {
-        this.tickets = tickets;
     }
 }

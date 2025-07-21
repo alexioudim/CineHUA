@@ -6,15 +6,25 @@ import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import net.glxn.qrgen.core.image.ImageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import net.glxn.qrgen.javase.QRCode;
 
 @Service
 public class BookingService{
@@ -35,7 +45,7 @@ public class BookingService{
 
 
     @Transactional
-    public Booking createBookingFromCart (BookingRequest bookingRequest) {
+    public Booking createBookingFromCart (BookingRequest bookingRequest) throws IOException {
 
         User issuer = userRepository.findById(bookingRequest.getIssuerId());
 
@@ -68,13 +78,14 @@ public class BookingService{
         booking.setTotalPrice(calculatePrice(tickets));
         booking.setTickets(tickets);
 
-        String code;
+        String bookingCode;
         do {
-             code = generateBookingCode();
-        } while (bookingRepository.existsByBookingCode(code));
+            bookingCode = generateBookingCode();
+        } while (bookingRepository.existsByBookingCode(bookingCode));
 
-        booking.setBookingCode(code);
-
+        booking.setBookingCode(bookingCode);
+        String qrCode = generateQrBase64(bookingCode);
+        booking.setQrCode(qrCode);
         bookingRepository.save(booking);
 
         return booking;
@@ -156,5 +167,16 @@ public class BookingService{
         }
 
         return ticketRequests;
+    }
+
+    public String generateQrBase64(String text) {
+        ByteArrayOutputStream stream = QRCode
+                .from(text)
+                .withSize(250, 250)
+                .to(ImageType.PNG)
+                .stream();
+
+        byte[] qrBytes = stream.toByteArray();
+        return Base64.getEncoder().encodeToString(qrBytes);
     }
 }
