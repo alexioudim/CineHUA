@@ -8,6 +8,9 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.NumberFormat;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -33,8 +36,11 @@ public class User {
 
     private String passcode;
 
-    @ManyToOne
-    private Role role;
+    @ManyToMany
+    private Set<Role> roles = new HashSet<>();
+
+    public User() {
+    }
 
     public String getFirstName() {
         return firstName;
@@ -100,11 +106,11 @@ public class User {
         this.passcode = passcode;
     }
 
-    public Role getRole() {
-        return role;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }
