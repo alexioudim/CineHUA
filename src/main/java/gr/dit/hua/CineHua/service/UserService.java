@@ -11,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,29 +22,25 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
 
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
 
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> opt = userRepository.findByUsername(username);
-        if (opt.isEmpty()) {
-            throw new UsernameNotFoundException(username);
-        } else {
-            User user = opt.get();
-            return new org.springframework.security.core.userdetails.User(
-                    user.getEmail(),
-                    user.getPassword(),
-                    user.getRoles()
-                            .stream()
-                            .map(role -> new SimpleGrantedAuthority(role.toString()))
-                            .collect(Collectors.toSet())
-            );
-        }
 
+        if (opt.isEmpty())
+            throw new UsernameNotFoundException("User with username: " + username + " not found !");
+        else {
+            User user = opt.get();
+
+            return UserDetailsImpl.build(user);
+        }
     }
 
     @Transactional
@@ -61,10 +56,11 @@ public class UserService implements UserDetailsService {
             roles.add(role);
             user.setRoles(roles);
             user = userRepository.save(user);
-            return user.getUser_id();
+            return user.getId();
         } else {
             throw new EntityNotFoundException("Role not found");
         }
 
     }
+
 }
