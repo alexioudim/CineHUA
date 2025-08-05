@@ -1,6 +1,7 @@
 package gr.dit.hua.CineHua.controller;
 
 import gr.dit.hua.CineHua.dto.request.ScreeningRequest;
+import gr.dit.hua.CineHua.dto.response.ScreeningResponse;
 import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.service.AuditoriumService;
 import gr.dit.hua.CineHua.service.MovieService;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/screening")
@@ -62,4 +64,11 @@ public class ScreeningController {
         return screeningService.getSeatAvailabilities(id);
     }
 
+    @GetMapping("/movie/{id}")
+    public List<ScreeningResponse> getMovieScreenings(@PathVariable Long id){
+        return screeningService.getMovieScreenings(id)
+                .stream()
+                .map(ScreeningResponse::new)
+                .collect(Collectors.toList());
+    }
 }

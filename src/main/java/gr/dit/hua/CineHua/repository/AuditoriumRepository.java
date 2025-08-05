@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AuditoriumRepository extends JpaRepository<Auditorium, Long> {
 
-    Auditorium findById(long auditorium_id);
+    Auditorium findById(long id);
 }

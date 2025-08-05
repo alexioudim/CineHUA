@@ -9,13 +9,12 @@ public class SeatAvailability {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long availability_id;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private AvailabilityStatus availability;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
@@ -27,12 +26,12 @@ public class SeatAvailability {
     public SeatAvailability() {
     }
 
-    public Long getAvailability_id() {
-        return availability_id;
+    public Long getId() {
+        return id;
     }
 
-    public void setAvailability_id(Long availability_id) {
-        this.availability_id = availability_id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public AvailabilityStatus getAvailability() {

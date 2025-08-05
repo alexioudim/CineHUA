@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ticket_id;
+    private Long id;
 
     private BigDecimal price;
 
@@ -21,6 +21,14 @@ public class Ticket {
 
     @ManyToOne(optional = false)
     private Booking booking;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public BigDecimal getPrice() {
         return price;
@@ -54,12 +62,6 @@ public class Ticket {
         this.booking = booking;
     }
 
-    public Long getTicket_id() {
-        return ticket_id;
-    }
 
-    public void setTicket_id(Long ticket_id) {
-        this.ticket_id = ticket_id;
-    }
 }
 

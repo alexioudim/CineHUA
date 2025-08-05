@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class CreditNote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long creditNote_id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String code;
@@ -37,12 +37,12 @@ public class CreditNote {
     public CreditNote() {
     }
 
-    public Long getCreditNote_id() {
-        return creditNote_id;
+    public Long getId() {
+        return id;
     }
 
-    public void setCreditNote_id(Long creditNote_id) {
-        this.creditNote_id = creditNote_id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getCode() {

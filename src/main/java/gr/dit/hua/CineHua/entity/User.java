@@ -34,8 +34,6 @@ public class User {
 
     private String password;
 
-    private String passcode;
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -99,14 +97,6 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getPasscode() {
-        return passcode;
-    }
-
-    public void setPasscode(String passcode) {
-        this.passcode = passcode;
     }
 
     public Set<Role> getRoles() {

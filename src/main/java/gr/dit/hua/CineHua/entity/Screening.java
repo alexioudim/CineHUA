@@ -14,7 +14,7 @@ public class Screening {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long screeningId;
+    private Long id;
 
     @NotNull
     private LocalDate date;
@@ -39,6 +39,14 @@ public class Screening {
 
 
     public Screening() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDate getDate() {

@@ -53,13 +53,20 @@ public class ScreeningService {
         return Integer.parseInt(duration.replaceAll("[^0-9]", ""));
     }
 
+    @Transactional
     public void deleteScreening(long id) {
         screeningRepository.deleteById(id);
     }
 
+    @Transactional
     public List<SeatAvailability> getSeatAvailabilities(Long screening_id){
         Screening screening = screeningRepository.findById(screening_id).orElse(null);
         assert screening != null;
         return screening.getSeatAvailabilities();
+    }
+
+    @Transactional
+    public List<Screening> getMovieScreenings(Long movieId) {
+        return new ArrayList<>(screeningRepository.findByMovieId(movieId));
     }
 }

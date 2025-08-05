@@ -33,8 +33,19 @@ public class Movie {
     @JsonProperty("Released")
     private String releaseDate;
 
+    @JsonProperty("Image")
+    private String image_url;
+
     public Movie() {
 
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getReleaseDate() {
@@ -83,5 +94,13 @@ public class Movie {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 }

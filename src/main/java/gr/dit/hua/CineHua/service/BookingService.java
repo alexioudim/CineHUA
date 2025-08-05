@@ -176,7 +176,7 @@ public class BookingService{
         List<TicketRequest> ticketRequests = new ArrayList<>();
         for (Ticket i : tickets) {
             TicketRequest ticketRequest = new TicketRequest();
-            ticketRequest.setTicketId(i.getTicket_id());
+            ticketRequest.setTicketId(i.getId());
             ticketRequest.setPrice(i.getPrice());
             ticketRequest.setStatus(i.getStatus());
             ticketRequests.add(ticketRequest);

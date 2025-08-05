@@ -1,5 +1,6 @@
 package gr.dit.hua.CineHua.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class Auditorium {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long auditorium_id;
+    private Long id;
 
     private int capacity;
     private int rows;
@@ -18,18 +19,19 @@ public class Auditorium {
 
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "auditorium", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Seat> seats;
 
     public Auditorium() {
     }
 
-    public Long getAuditorium_id() {
-        return auditorium_id;
+    public Long getId() {
+        return id;
     }
 
-    public void setAuditorium_id(Long auditorium_id) {
-        this.auditorium_id = auditorium_id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public int getCapacity() {
