@@ -47,8 +47,6 @@ public class BookingService{
     @Transactional
     public Booking createBookingFromCart (BookingRequest bookingRequest) throws IOException {
 
-        User issuer = userRepository.findById(bookingRequest.getIssuerId());
-
         List <SeatAvailability> availabilities = seatAvailabilityRepository.findAllById(bookingRequest.getSeatAvailabilitiyIdList());
 
         for (SeatAvailability sa : availabilities) {
@@ -72,8 +70,6 @@ public class BookingService{
             tickets.add(ticket);
         }
 
-
-        booking.setIssuer(issuer);
         booking.setIssueDate(LocalDateTime.now());
         booking.setTotalPrice(calculatePrice(tickets));
         booking.setTickets(tickets);
@@ -129,7 +125,6 @@ public class BookingService{
             creditNote.setExpirationDate(creditNote.getIssueDate().plusMonths(1));
             creditNote.setStatus(CreditNoteStatus.ACTIVE);
             creditNote.setCode(generateCode(false));
-            creditNote.setIssuer(userRepository.findById(user_id));
             String qrCode = generateQrBase64(creditNote.getCode());
             creditNote.setQrCode(qrCode);
             creditNoteRepository.save(creditNote);

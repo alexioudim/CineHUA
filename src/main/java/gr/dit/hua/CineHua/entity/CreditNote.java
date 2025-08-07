@@ -31,9 +31,6 @@ public class CreditNote {
     @Transient
     private String qrCode;
 
-    @ManyToOne(optional = false)
-    private User issuer;
-
     public CreditNote() {
     }
 
@@ -91,14 +88,6 @@ public class CreditNote {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
-    }
-
-    public User getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(User issuer) {
-        this.issuer = issuer;
     }
 
 }

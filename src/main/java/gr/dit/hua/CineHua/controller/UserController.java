@@ -18,10 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,18 +29,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 public class UserController {
 
+
+    private final UserService userService;
+    public static boolean changePassword = true;
     AuthenticationManager authenticationManager;
     UserRepository userRepository;
     RoleRepository roleRepository;
     BCryptPasswordEncoder encoder;
     JwtUtils jwtUtils;
 
-    public UserController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder encoder, JwtUtils jwtUtils) {
+    public UserController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder encoder, JwtUtils jwtUtils, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
+        this.userService = userService;
     }
 
     @PostConstruct
@@ -69,15 +70,36 @@ public class UserController {
 //        userRepository.save(admin);
     }
 
-//    @PostMapping("/new")
-//    public ResponseEntity<String> createUser(@RequestBody User user) {
-//        try {
-//            userService.saveUser(user);
-//            return ResponseEntity.ok("User " + user.getFirstName() + " " + user.getSurName() + " created successfully");
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body("JsonProcessingException" + e.getMessage());
-//        }
-//    }
+    @GetMapping("/view")
+    public List<User> showUsers() {
+        return userService.getUsers();
+    }
+
+    @PostMapping("/new")
+    public ResponseEntity<String> createUser(@RequestBody User user) {
+
+        changePassword = true;
+        String username = userService.saveUser(user);
+
+        return ResponseEntity.ok("User " + username + " created successfully");
+    }
+
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<String> editUser(@PathVariable long id, @RequestBody User user) {
+        user.setId(id);
+        String username = userService.saveUser(user);
+
+//        User editedUser = userService.editUser(id, user);
+//        String username = userService.saveUser(editedUser);
+        return ResponseEntity.ok("User " + username + " updated successfully");
+    }
+
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable long id) {
+        String username = userService.deleteUser(id);
+        return ResponseEntity.ok("User " + username + " deleted successfully");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

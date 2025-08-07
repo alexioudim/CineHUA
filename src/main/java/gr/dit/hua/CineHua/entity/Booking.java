@@ -24,9 +24,6 @@ public class Booking {
     @Transient
     private String qrCode;
 
-    @ManyToOne
-    private User issuer;
-
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets = new ArrayList<>();
 
@@ -68,14 +65,6 @@ public class Booking {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
-    }
-
-    public User getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(User issuer) {
-        this.issuer = issuer;
     }
 
     public List<Ticket> getTickets() {

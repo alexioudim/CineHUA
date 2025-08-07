@@ -27,8 +27,9 @@ public class User {
     @NotBlank
     private String email;
 
-    @NotNull
-    private long phoneNumber;
+    @NotBlank
+    @Size(min = 10, max = 10)
+    private String phoneNumber;
 
     private String username;
 
@@ -75,11 +76,11 @@ public class User {
         this.email = email;
     }
 
-    public long getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(long phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
