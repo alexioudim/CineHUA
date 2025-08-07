@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/auditorium")
 public class AuditoriumController {
@@ -15,8 +17,13 @@ public class AuditoriumController {
     @Autowired
     private AuditoriumService auditoriumService;
 
+    @GetMapping("/view")
+    public ResponseEntity<List<Auditorium>> getAll() {
+
+        return ResponseEntity.ok(auditoriumService.getAll());
+    }
     @PostMapping("/new")
-    public ResponseEntity<String> createAuditorium(AuditoriumRequest auditoriumDTO) {
+    public ResponseEntity<String> createAuditorium(@RequestBody AuditoriumRequest auditoriumDTO) {
 
         Auditorium auditorium = new Auditorium();
         auditorium.setName(auditoriumDTO.getName());

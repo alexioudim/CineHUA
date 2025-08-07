@@ -26,6 +26,11 @@ public class AuditoriumService {
     }
 
     @Transactional
+    public List<Auditorium> getAll() {
+        return auditoriumRepository.findAll();
+    }
+
+    @Transactional
     public void createAuditorium(Auditorium auditorium) {
         int rows = auditorium.getRows();
         int columns = auditorium.getColumns();

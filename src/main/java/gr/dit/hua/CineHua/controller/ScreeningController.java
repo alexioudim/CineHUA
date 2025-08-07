@@ -29,7 +29,7 @@ public class ScreeningController {
 
 
     @PostMapping("/new")
-    public ResponseEntity<String> createScreening(ScreeningRequest screeningDTO){
+    public ResponseEntity<String> createScreening(@RequestBody ScreeningRequest screeningDTO){
         Screening screening = new Screening();
         Movie movie = movieService.findById(screeningDTO.getMovie_id());
         Auditorium auditorium = auditoriumService.findAuditoriumById(screeningDTO.getAuditorium_id());
