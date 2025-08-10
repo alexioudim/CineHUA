@@ -3,6 +3,7 @@ package gr.dit.hua.CineHua.service;
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.entity.*;
+import gr.dit.hua.CineHua.live.SeatLivePublisher;
 import gr.dit.hua.CineHua.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -42,10 +43,12 @@ public class BookingService{
 
     @Autowired
     private TicketRepository ticketRepository;
+    @Autowired
+    private SeatLivePublisher livePublisher;
 
 
     @Transactional
-    public Booking createBookingFromCart (BookingRequest bookingRequest) throws IOException {
+    public Booking createBookingFromCart (BookingRequest bookingRequest, long userId) throws IOException {
 
         List <SeatAvailability> availabilities = seatAvailabilityRepository.findAllById(bookingRequest.getSeatAvailabilitiyIdList());
 
@@ -56,6 +59,9 @@ public class BookingService{
             }
 
             sa.setAvailability(AvailabilityStatus.SOLD);
+
+            Long screeningId = sa.getScreening().getId();
+            livePublisher.publishSold(screeningId, sa.getId());
         }
 
         Booking booking = new Booking();

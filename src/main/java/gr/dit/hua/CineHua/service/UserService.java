@@ -77,51 +77,6 @@ public class UserService implements UserDetailsService {
         return user.getUsername();
     }
 
-//    @Transactional
-//    public String saveUser(User user) {
-//
-//
-//        if (UserController.changePassword) {
-//            String password = user.getPassword();
-//            String encodedPassword = passwordEncoder.encode(password);
-//            user.setPassword(encodedPassword);
-//        }
-//
-//        Set<Role> resolvedRoles = new HashSet<>();
-//        for (Role r : user.getRoles()) {
-//            Optional<Role> found = roleRepository.findByName(r.getName());
-//            if (found.isEmpty()) {
-//                throw new EntityNotFoundException("Role not found: " + r.getName());
-//            }
-//            resolvedRoles.add(found.get());
-//        }
-//        user.setRoles(resolvedRoles);
-//
-//        userRepository.save(user);
-//        return user.getUsername();
-//    }
-
-//    @Transactional
-//    public User editUser(long id, User user){
-//        User editedUser = userRepository.findById(id).get();
-//        editedUser.setUsername(user.getUsername());
-//
-//        if (!(user.getPassword().equals(userRepository.findById(id).get().getPassword()))) {
-//            UserController.changePassword = true;
-//            editedUser.setPassword(user.getPassword());
-//        } else {
-//            UserController.changePassword = false;
-//        }
-//
-//        editedUser.setEmail(user.getEmail());
-//        editedUser.setPhoneNumber(user.getPhoneNumber());
-//        editedUser.setFirstName(user.getFirstName());
-//        editedUser.setSurName(user.getSurName());
-//        editedUser.setRoles(user.getRoles());
-//
-//        return editedUser;
-//    }
-
     @Transactional
     public String deleteUser(long id) {
         User user = userRepository.findById(id).get();

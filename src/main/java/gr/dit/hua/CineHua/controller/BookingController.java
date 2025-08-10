@@ -9,7 +9,9 @@ import gr.dit.hua.CineHua.entity.CreditNote;
 import gr.dit.hua.CineHua.entity.SeatAvailability;
 import gr.dit.hua.CineHua.entity.Ticket;
 import gr.dit.hua.CineHua.service.BookingService;
+import gr.dit.hua.CineHua.service.UserDetailsImpl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -28,9 +30,10 @@ public class BookingController {
     }
 
     @PostMapping("/new")
-    public BookingResponse createBooking (@RequestBody BookingRequest bookingRequest) throws IOException {
+    public BookingResponse createBooking (@RequestBody BookingRequest bookingRequest, @AuthenticationPrincipal UserDetailsImpl user) throws IOException {
 
-        Booking booking = bookingService.createBookingFromCart(bookingRequest);
+        long userId = user.getId();
+        Booking booking = bookingService.createBookingFromCart(bookingRequest, userId);
         return new BookingResponse(booking.getIssueDate(), booking.getTotalPrice(), booking.getBookingCode(), booking.getQrCode());
     }
 

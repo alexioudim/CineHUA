@@ -49,11 +49,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private String parseJwt(HttpServletRequest request) {
+        // 1) Δες header
         String headerAuth = request.getHeader("Authorization");
-        System.out.println("headerAuth: " + headerAuth);
-
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7, headerAuth.length());
+            return headerAuth.substring(7);
+        }
+
+        // 2) Fallback για SSE: ?token=...
+        String qp = request.getParameter("token");
+        if (StringUtils.hasText(qp)) {
+            return qp;
         }
 
         return null;
