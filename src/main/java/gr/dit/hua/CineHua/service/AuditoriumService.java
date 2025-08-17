@@ -14,11 +14,14 @@ import java.util.List;
 @Service
 public class AuditoriumService {
 
-    @Autowired
-    private AuditoriumRepository auditoriumRepository;
+    private final AuditoriumRepository auditoriumRepository;
 
-    @Autowired
-    private SeatRepository seatRepository;
+    private final SeatRepository seatRepository;
+
+    public AuditoriumService(AuditoriumRepository auditoriumRepository, SeatRepository seatRepository) {
+        this.auditoriumRepository = auditoriumRepository;
+        this.seatRepository = seatRepository;
+    }
 
     @Transactional
     public Auditorium findAuditoriumById(long id) {

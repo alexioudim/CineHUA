@@ -20,13 +20,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/screening")
 public class ScreeningController {
 
-    @Autowired
-    private MovieService movieService;
-    @Autowired
-    private AuditoriumService auditoriumService;
-    @Autowired
-    private ScreeningService screeningService;
+    private final MovieService movieService;
+    private final AuditoriumService auditoriumService;
+    private final ScreeningService screeningService;
 
+    public ScreeningController(MovieService movieService, AuditoriumService auditoriumService, ScreeningService screeningService) {
+        this.movieService = movieService;
+        this.auditoriumService = auditoriumService;
+        this.screeningService = screeningService;
+    }
 
     @PostMapping("/new")
     public ResponseEntity<String> createScreening(@RequestBody ScreeningRequest screeningDTO){

@@ -15,11 +15,13 @@ import java.util.List;
 @Service
 public class ScreeningService {
 
-    @Autowired
-    private ScreeningRepository screeningRepository;
+    private final ScreeningRepository screeningRepository;
+    private final SeatRepository seatRepository;
 
-    @Autowired
-    private SeatRepository seatRepository;
+    public ScreeningService(ScreeningRepository screeningRepository, SeatRepository seatRepository) {
+        this.screeningRepository = screeningRepository;
+        this.seatRepository = seatRepository;
+    }
 
     @Transactional
     public void createScreening(Screening screening){

@@ -10,4 +10,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Boolean existsByBookingCode(String bookingCode);
 
     Booking findByBookingCode(String bookingCode);
+
+    Booking findByPaymentIntentId(String paymentIntentId);
 }

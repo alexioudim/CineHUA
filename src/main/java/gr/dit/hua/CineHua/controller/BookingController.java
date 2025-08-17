@@ -23,8 +23,6 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
-    List<SeatAvailability> cart = new ArrayList<>();
-
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
@@ -34,6 +32,7 @@ public class BookingController {
 
         long userId = user.getId();
         Booking booking = bookingService.createBookingFromCart(bookingRequest, userId);
+
         return new BookingResponse(booking.getIssueDate(), booking.getTotalPrice(), booking.getBookingCode(), booking.getQrCode());
     }
 
@@ -46,5 +45,11 @@ public class BookingController {
     public CreditNoteResponse cancelBooking (@PathVariable String bookingCode, @RequestParam long user_id) {
         CreditNote creditNote = bookingService.cancelTickets(bookingCode, user_id);
         return new CreditNoteResponse(creditNote.getCode(), creditNote.getBalance(), creditNote.getIssueDate(), creditNote.getExpirationDate(), creditNote.getQrCode());
+    }
+
+    @GetMapping("/byPi/{paymentIntentId}")
+    public ResponseEntity<BookingResponse> getByPi(@PathVariable String paymentIntentId) {
+        BookingResponse resp = bookingService.getByPaymentIntent(paymentIntentId);
+        return (resp == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(resp);
     }
 }

@@ -2,11 +2,13 @@ package gr.dit.hua.CineHua.service;
 
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
+import gr.dit.hua.CineHua.dto.response.BookingResponse;
 import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.live.SeatLivePublisher;
 import gr.dit.hua.CineHua.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import net.glxn.qrgen.core.image.ImageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,49 +32,58 @@ import net.glxn.qrgen.javase.QRCode;
 @Service
 public class BookingService{
 
-    @Autowired
-    private SeatAvailabilityRepository seatAvailabilityRepository;
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ScreeningRepository screeningRepository;
-    @Autowired
-    private CreditNoteRepository creditNoteRepository;
+    private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final BookingRepository bookingRepository;
+    private final CreditNoteRepository creditNoteRepository;
+    private final TicketRepository ticketRepository;
+    private final SeatLivePublisher livePublisher;
 
-    @Autowired
-    private TicketRepository ticketRepository;
-    @Autowired
-    private SeatLivePublisher livePublisher;
-
+    public BookingService(SeatAvailabilityRepository seatAvailabilityRepository, BookingRepository bookingRepository, TicketRepository ticketRepository, CreditNoteRepository creditNoteRepository, SeatLivePublisher livePublisher) {
+        this.seatAvailabilityRepository = seatAvailabilityRepository;
+        this.bookingRepository = bookingRepository;
+        this.ticketRepository = ticketRepository;
+        this.creditNoteRepository = creditNoteRepository;
+        this.livePublisher = livePublisher;
+    }
 
     @Transactional
-    public Booking createBookingFromCart (BookingRequest bookingRequest, long userId) throws IOException {
+    public Booking createBookingFromCart(BookingRequest bookingRequest, long userId) throws IOException {
+        return createBookingInternal(bookingRequest, userId, null, PaymentStatus.PENDING);
+    }
 
-        List <SeatAvailability> availabilities = seatAvailabilityRepository.findAllById(bookingRequest.getSeatAvailabilitiyIdList());
+    /** POS flow (webhook): πληρωμή έχει πετύχει. */
+    @Transactional
+    public Booking createBookingFromCart(BookingRequest bookingRequest, long userId, String paymentIntentId) throws IOException {
+        return createBookingInternal(bookingRequest, userId, paymentIntentId, PaymentStatus.SUCCEEDED);
+    }
 
+    // === Internal υλοποίηση ===
+    @Transactional
+    protected Booking createBookingInternal(BookingRequest bookingRequest,
+                                            long userId,
+                                            String paymentIntentId,
+                                            PaymentStatus status) throws IOException {
+
+        // 1) Φέρε και κλείδωσε θέσεις
+        List<SeatAvailability> availabilities = seatAvailabilityRepository.findAllById(bookingRequest.getSeatAvailabilitiyIdList());
         for (SeatAvailability sa : availabilities) {
-
             if (sa.getAvailability() != AvailabilityStatus.AVAILABLE) {
                 throw new IllegalStateException(sa.getSeat().getColumn() + sa.getSeat().getRow() + " is not available.");
             }
-
             sa.setAvailability(AvailabilityStatus.SOLD);
-
             Long screeningId = sa.getScreening().getId();
             livePublisher.publishSold(screeningId, sa.getId());
         }
 
+        // 2) Tickets
         Booking booking = new Booking();
-
         List<Ticket> tickets = new ArrayList<>();
         for (SeatAvailability sa : availabilities) {
             Ticket ticket = new Ticket();
             ticket.setBooking(booking);
             ticket.setSeatAvailability(sa);
-            ticket.setPrice(BigDecimal.valueOf(8));
-            ticket.setStatus(TicketStatus.PENDING);
+            ticket.setPrice(BigDecimal.valueOf(8)); // adjust if dynamic
+            ticket.setStatus(TicketStatus.PENDING); // status εισιτηρίου (όχι πληρωμής)
             tickets.add(ticket);
         }
 
@@ -80,17 +91,26 @@ public class BookingService{
         booking.setTotalPrice(calculatePrice(tickets));
         booking.setTickets(tickets);
 
+        // 3) Κωδικός & QR
         String bookingCode;
-        do {
-            bookingCode = generateCode(true);
-        } while (bookingRepository.existsByBookingCode(bookingCode));
-
+        do { bookingCode = generateCode(true); }
+        while (bookingRepository.existsByBookingCode(bookingCode));
         booking.setBookingCode(bookingCode);
-        String qrCode = generateQrBase64(bookingCode);
-        booking.setQrCode(qrCode);
-        bookingRepository.save(booking);
 
-        return booking;
+        // 4) Πληρωμή
+        booking.setPaymentStatus(status);
+        booking.setPaymentIntentId(paymentIntentId); // μπορεί να είναι null στο non-POS flow
+
+        // 5) Save
+        return bookingRepository.save(booking);
+    }
+
+    @Transactional
+    public BookingResponse getByPaymentIntent(String paymentIntentId) {
+        Booking b = bookingRepository.findByPaymentIntentId(paymentIntentId);
+        if (b == null) return null;
+        b.setQrCode(generateQrBase64(b.getBookingCode()));
+        return new BookingResponse(b.getIssueDate(), b.getTotalPrice(), b.getBookingCode(), b.getQrCode());
     }
 
     @Transactional

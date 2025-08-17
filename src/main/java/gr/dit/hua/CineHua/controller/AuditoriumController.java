@@ -14,8 +14,12 @@ import java.util.List;
 @RequestMapping("/auditorium")
 public class AuditoriumController {
 
-    @Autowired
-    private AuditoriumService auditoriumService;
+
+    private final AuditoriumService auditoriumService;
+
+    public AuditoriumController(AuditoriumService auditoriumService) {
+        this.auditoriumService = auditoriumService;
+    }
 
     @GetMapping("/view")
     public ResponseEntity<List<Auditorium>> getAll() {
