@@ -1,12 +1,15 @@
 package gr.dit.hua.CineHua.service;
 
+import gr.dit.hua.CineHua.dto.ScreeningMetaDTO;
 import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.repository.ScreeningRepository;
 import gr.dit.hua.CineHua.repository.SeatAvailabilityRepository;
 import gr.dit.hua.CineHua.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -65,6 +68,15 @@ public class ScreeningService {
         Screening screening = screeningRepository.findById(screening_id).orElse(null);
         assert screening != null;
         return screening.getSeatAvailabilities();
+    }
+
+    @Transactional
+    public ScreeningMetaDTO getMeta(Long id) {
+        Screening s = screeningRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return new ScreeningMetaDTO(
+                s.getId(), s.getMovie().getTitle(), s.getAuditorium().getName(), s.getDate(), s.getStartTime()
+        );
     }
 
     @Transactional
