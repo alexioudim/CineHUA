@@ -1,5 +1,6 @@
 package gr.dit.hua.CineHua.controller;
 
+import gr.dit.hua.CineHua.dto.BookingDTO;
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.dto.response.BookingResponse;
@@ -13,6 +14,8 @@ import gr.dit.hua.CineHua.service.BookingService;
 import gr.dit.hua.CineHua.service.StripeService;
 import gr.dit.hua.CineHua.service.UserDetailsImpl;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/booking")
@@ -60,6 +64,28 @@ public class BookingController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<Page<BookingDTO>> getBookingsPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "issueDate,desc") String sort) {
+
+        // Parse sort, π.χ. "issueDate,desc"
+        String[] parts = sort.split(",");
+        String prop = parts.length > 0 ? parts[0] : "issueDate";
+        Sort.Direction dir = (parts.length > 1 && "asc".equalsIgnoreCase(parts[1])) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort s = Sort.by(dir, prop);
+
+        Page<BookingDTO> result = bookingService.getBookingsPage(page, size, s);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/by-code/{code}")
+    public ResponseEntity<BookingDTO> getByCode(@PathVariable String code) {
+        Optional<BookingDTO> dto = bookingService.getBookingByCode(code);
+        return dto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 //    @PostMapping("/cancel/{bookingCode}")

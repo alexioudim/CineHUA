@@ -33,8 +33,17 @@ public class Movie {
     @JsonProperty("Released")
     private String releaseDate;
 
+    @JsonProperty("Director")
+    private String director;
+
+    @JsonProperty("Actors")
+    private String actors;
+
     @JsonProperty("Image")
     private String image_url;
+
+    @Column(nullable = false)
+    private boolean isPublic = false;
 
     public Movie() {
 
@@ -96,11 +105,35 @@ public class Movie {
         this.title = title;
     }
 
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public String getActors() {
+        return actors;
+    }
+
+    public void setActors(String actors) {
+        this.actors = actors;
+    }
+
     public String getImage_url() {
         return image_url;
     }
 
     public void setImage_url(String image_url) {
         this.image_url = image_url;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
     }
 }
