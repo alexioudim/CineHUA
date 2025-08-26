@@ -15,8 +15,8 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private TicketStatus status;
 
-    @OneToOne
-    @JoinColumn(name = "seat_availability_id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_availability_id", nullable = false)
     private SeatAvailability seatAvailability;
 
     @ManyToOne(optional = false)

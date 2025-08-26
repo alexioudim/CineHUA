@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,29 +46,6 @@ public class UserController {
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.userService = userService;
-    }
-
-    @PostConstruct
-    public void setup() {
-        Role role_employee = new Role("ROLE_EMPLOYEE");
-        Role role_manager = new Role("ROLE_MANAGER");
-        Role role_admin  = new Role("ROLE_ADMIN");
-
-        roleRepository.updateOrInsert(role_employee);
-        roleRepository.updateOrInsert(role_manager);
-        roleRepository.updateOrInsert(role_admin);
-
-//        User admin = new User();
-//        admin.setUsername("admin");
-//        admin.setPassword(encoder.encode("pass123"));
-//        admin.setFirstName("CineHUA");
-//        admin.setSurName("Admin");
-//        admin.setEmail("admin@cinehua.gr");
-//        admin.setPhoneNumber(1112312);
-//        Set<Role> roles = new HashSet<>();
-//        roles.add(roleRepository.findByName("ROLE_ADMIN").get());
-//        admin.setRoles(roles);
-//        userRepository.save(admin);
     }
 
     @GetMapping("/view")

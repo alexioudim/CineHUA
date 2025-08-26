@@ -7,6 +7,7 @@ import gr.dit.hua.CineHua.repository.SeatAvailabilityRepository;
 import gr.dit.hua.CineHua.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +21,11 @@ public class ScreeningService {
 
     private final ScreeningRepository screeningRepository;
     private final SeatRepository seatRepository;
+
+    @Value("${ticket.price}")
+    private int ticketPrice;
+
+
 
     public ScreeningService(ScreeningRepository screeningRepository, SeatRepository seatRepository) {
         this.screeningRepository = screeningRepository;
@@ -75,7 +81,7 @@ public class ScreeningService {
         Screening s = screeningRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return new ScreeningMetaDTO(
-                s.getId(), s.getMovie().getTitle(), s.getAuditorium().getName(), s.getDate(), s.getStartTime()
+                s.getId(), s.getMovie().getTitle(), s.getAuditorium().getName(), s.getDate(), s.getStartTime(), ticketPrice
         );
     }
 

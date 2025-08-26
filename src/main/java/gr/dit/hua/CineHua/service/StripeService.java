@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,29 +44,21 @@ public class StripeService {
     private final TicketRepository ticketRepository;
     private final SeatLivePublisher livePublisher;
 
-    @Value("${stripe.secret-key}") // Βεβαιώσου ότι το property λέγεται έτσι ΠΑΝΤΟΥ
+    @Value("${stripe.secret-key}")
     private String stripeKey;
 
-    @Value("${stripe.currency:EUR}") // κράτα κεφαλαία για συνέπεια
-    private String currency;
+    /** Ticket price in euros (BigDecimal) from application.properties */
+    @Value("${ticket.price}")
+    private BigDecimal ticketPrice;
+
+    private static final String CURRENCY = "eur";
+    private static final long EUR_MIN_MINOR = 50L; // Stripe minimum = €0.50
+    private static final String PI_CACHE_PREFIX = "pos:attempt:";
 
     @PostConstruct
     public void init() {
         Stripe.apiKey = stripeKey;
-        log.info("Stripe initialized. Currency={}, keyPresent={}", currency, stripeKey != null && !stripeKey.isBlank());
-    }
-
-    private static final String PI_CACHE_PREFIX = "pos:attempt:";
-
-    /** helper: ελάχιστο ποσό ανά νόμισμα σε minor units */
-    private long minMinorByCurrency(String ccy) {
-        ccy = ccy.toUpperCase();
-        return switch (ccy) {
-            case "EUR", "USD" -> 50L; // 0.50
-            case "GBP" -> 30L;        // 0.30
-            case "JPY" -> 50L;        // zero-decimal
-            default -> 1L;
-        };
+        log.info("Stripe initialized. EUR only. keyPresent={}", stripeKey != null && !stripeKey.isBlank());
     }
 
     @Transactional
@@ -84,35 +77,29 @@ public class StripeService {
             }
         }
 
-        // 8.00€ ανά θέση σε cents
-        long unitPriceMinor = 800L;
+        // ticket.price from config (euros) -> minor units (cents)
+        long unitPriceMinor = toMinor(ticketPrice);
         long amountCents = unitPriceMinor * seats.size();
 
-        long min = minMinorByCurrency(currency);
-        if (amountCents < min) {
-            // εδώ γινόταν το error που είδες
-            throw new IllegalArgumentException("Amount below minimum: " + amountCents + " < " + min + " for " + currency);
+        if (amountCents < EUR_MIN_MINOR) {
+            throw new IllegalArgumentException("Amount below Stripe minimum for EUR: " + amountCents + " < " + EUR_MIN_MINOR);
         }
 
-
-
-        Map<String,Object> params = new HashMap<>();
-        params.put("amount", amountCents);               // ΠΡΕΠΕΙ να είναι long/integer σε minor units
-        params.put("currency", currency.toLowerCase());  // Stripe θέλει lowercase ISO code
+        Map<String, Object> params = new HashMap<>();
+        params.put("amount", amountCents);
+        params.put("currency", CURRENCY);
         params.put("payment_method_types", List.of("card_present"));
         params.put("capture_method", "automatic");
-        Map<String,String> md = new HashMap<>();
-        md.put("intent", "pos_pay_then_book");
-        params.put("metadata", md);
+        params.put("metadata", Map.of("intent", "pos_pay_then_book"));
 
-        log.info("Creating PaymentIntent: currency={}, seats={}, amountCents={}", currency, seats.size(), amountCents);
+        log.info("Creating PaymentIntent: seats={}, unitPriceMinor={}, amountCents={}", seats.size(), unitPriceMinor, amountCents);
         PaymentIntent pi = PaymentIntent.create(params);
 
-        var cache = Map.of(
-                "userId", userId,
-                "seatIdsCsv", seatAvailabilityIds.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")),
-                "amountCents", amountCents
-        );
+        Map<String, Object> cache = new HashMap<>();
+        cache.put("userId", userId);
+        cache.put("seatIdsCsv", seatAvailabilityIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+        cache.put("amountCents", amountCents);
+
         redisson.getBucket(PI_CACHE_PREFIX + pi.getId()).set(cache, 15, TimeUnit.MINUTES);
 
         return new PosStartResponse(pi.getClientSecret(), pi.getId());
@@ -120,22 +107,24 @@ public class StripeService {
 
     @Transactional
     public void onPaymentSucceeded(String paymentIntentId) throws Exception {
-        log.info("[POS] onPaymentSucceeded pi={}", paymentIntentId); // <-- LOG A
+        log.info("[POS] onPaymentSucceeded pi={}", paymentIntentId);
 
-        var bucket = redisson.<Map<String,Object>>getBucket(PI_CACHE_PREFIX + paymentIntentId);
-        Map<String,Object> cache = bucket.get();
-        log.info("[POS] cache={}", cache);                           // <-- LOG B (αν είναι null, πρόβλημα TTL/cache)
+        RBucket<Map<String, Object>> bucket = redisson.getBucket(PI_CACHE_PREFIX + paymentIntentId);
+        Map<String, Object> cache = bucket.get();
+        log.info("[POS] cache={}", cache);
         if (cache == null) {
-            // Κάνε log/throw για να το δεις στα logs
             throw new IllegalStateException("No cached POS attempt for " + paymentIntentId);
         }
 
-        long userId = ((Number)cache.get("userId")).longValue();
+        long userId = ((Number) cache.get("userId")).longValue();
         String[] ids = cache.get("seatIdsCsv").toString().split(",");
         List<Long> seatIds = new ArrayList<>();
-        for (String s : ids) if (!s.isBlank()) seatIds.add(Long.parseLong(s));
+        for (String s : ids) {
+            if (!s.isBlank()) {
+                seatIds.add(Long.parseLong(s));
+            }
+        }
 
-        // προ-έλεγχος
         List<SeatAvailability> seats = seatAvailabilityRepository.findAllById(seatIds);
         for (SeatAvailability sa : seats) {
             if (sa.getAvailability() != AvailabilityStatus.AVAILABLE) {
@@ -147,10 +136,8 @@ public class StripeService {
         req.setIssuerId(userId);
         req.setSeatAvailabilitiyIdList(seatIds);
 
-        // εδώ ΚΑΛΕΙΣ το overload με paymentIntentId
-        Booking booking = bookingService.createBookingFromCart(req, userId, paymentIntentId);
-
-        bucket.delete(); // cleanup
+        bookingService.createBookingFromCart(req, userId, paymentIntentId);
+        bucket.delete();
     }
 
     @Transactional
@@ -174,7 +161,6 @@ public class StripeService {
                 sa.setAvailability(AvailabilityStatus.AVAILABLE);
                 seatAvailabilityRepository.save(sa);
 
-                // 🔴 LIVE: ενημέρωσε το UI ότι η θέση ελευθερώθηκε
                 Long screeningId = seatAvailabilityRepository.findScreeningIdBySeatAvailabilityId(sa.getId());
                 livePublisher.publishRelease(screeningId, sa.getId());
 
@@ -186,7 +172,7 @@ public class StripeService {
             throw new IllegalStateException("No refundable tickets found.");
         }
 
-        long amountMinor = toMinor(totalToRefund, currency);
+        long amountMinor = toMinor(totalToRefund);
         String idemKey = "refund-" + booking.getId() + "-" + System.currentTimeMillis();
 
         RefundCreateParams params = RefundCreateParams.builder()
@@ -206,13 +192,12 @@ public class StripeService {
         return new RefundResponse(refund.getId(), refund.getStatus(), totalToRefund);
     }
 
-
-    private long toMinor(BigDecimal amount, String currency) {
-        int scale = switch (currency.toUpperCase()) {
-            case "JPY" -> 0; // zero-decimal
-            default -> 2;    // most currencies
-        };
-        return amount.movePointRight(scale).setScale(0, RoundingMode.HALF_UP).longValueExact();
+    /** EUR -> cents */
+    private long toMinor(BigDecimal amountEuro) {
+        return amountEuro
+                .movePointRight(2)
+                .setScale(0, RoundingMode.HALF_UP)
+                .longValueExact();
     }
 
     public Refund refundPaymentIntent(String paymentIntentId, String reason, String idemKey) throws Exception {

@@ -4,6 +4,7 @@ import gr.dit.hua.CineHua.dto.BookingDTO;
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.dto.response.BookingResponse;
+import gr.dit.hua.CineHua.dto.response.BookingValidationResponse;
 import gr.dit.hua.CineHua.dto.response.CreditNoteResponse;
 import gr.dit.hua.CineHua.dto.response.RefundResponse;
 import gr.dit.hua.CineHua.entity.Booking;
@@ -64,6 +65,17 @@ public class BookingController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @PostMapping("/validate/{bookingCode}")
+    public ResponseEntity<BookingValidationResponse> validateAndCollect(@PathVariable String bookingCode) {
+        BookingValidationResponse resp = bookingService.validateAndCollect(bookingCode);
+        return switch (resp.getStatus()) {
+            case INVALID_NOT_FOUND -> ResponseEntity.notFound().build();
+            case INVALID_PAYMENT, INVALID_ALREADY_COLLECTED, INVALID_PARTIALLY_USED, INVALID_TIME_WINDOW ->
+                    ResponseEntity.badRequest().body(resp);
+            default -> ResponseEntity.ok(resp);
+        };
     }
 
     @GetMapping("/details")

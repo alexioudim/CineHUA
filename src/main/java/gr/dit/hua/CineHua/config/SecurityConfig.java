@@ -68,12 +68,30 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/stripe/webhook").permitAll()
+                        .requestMatchers(
+                                "/auditorium/view",
+                                "/auditorium/new",
+                                "/auditorium/delete/*",
+                                "/movie/all",
+                                "/movie/new/*",
+                                "/movie/delete/*",
+                                "/movie/*/toggle-visibility",
+                                "/screening/new",
+                                "/screening/delete/*",
+                                "/user/view",
+                                "/user/new",
+                                "/user/edit/*",
+                                "/user/delete/*"
+                        ).hasRole("ADMIN")
+                        .requestMatchers("/booking/by-code/**", "/booking/details", "/booking/cancel/**").hasRole("MANAGER")
+
 
                         // SSE stream stays protected (JWT required).
                         // For SSE, pass the token as ?token=... and handle it inside AuthTokenFilter.
 
                         // everything else requires auth
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 

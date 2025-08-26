@@ -4,11 +4,13 @@ import gr.dit.hua.CineHua.dto.BookingDTO;
 import gr.dit.hua.CineHua.dto.request.BookingRequest;
 import gr.dit.hua.CineHua.dto.request.TicketRequest;
 import gr.dit.hua.CineHua.dto.response.BookingResponse;
+import gr.dit.hua.CineHua.dto.response.BookingValidationResponse;
 import gr.dit.hua.CineHua.entity.*;
 import gr.dit.hua.CineHua.live.SeatLivePublisher;
 import gr.dit.hua.CineHua.repository.*;
 import jakarta.transaction.Transactional;
 import net.glxn.qrgen.core.image.ImageType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,15 +31,20 @@ public class BookingService {
 
     private final SeatAvailabilityRepository seatAvailabilityRepository;
     private final BookingRepository bookingRepository;
-    private final CreditNoteRepository creditNoteRepository;
-    private final TicketRepository ticketRepository;
     private final SeatLivePublisher livePublisher;
 
-    public BookingService(SeatAvailabilityRepository seatAvailabilityRepository, BookingRepository bookingRepository, TicketRepository ticketRepository, CreditNoteRepository creditNoteRepository, SeatLivePublisher livePublisher) {
+    @Value("${booking.validate.minutes.before:90}")
+    private int minutesBefore;
+
+    @Value("${booking.validate.minutes.after:180}")
+    private int minutesAfter;
+
+    @Value("${ticket.price}")
+    private int ticketPrice;
+
+    public BookingService(SeatAvailabilityRepository seatAvailabilityRepository, BookingRepository bookingRepository, SeatLivePublisher livePublisher) {
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.bookingRepository = bookingRepository;
-        this.ticketRepository = ticketRepository;
-        this.creditNoteRepository = creditNoteRepository;
         this.livePublisher = livePublisher;
     }
 
@@ -77,7 +86,7 @@ public class BookingService {
             Ticket ticket = new Ticket();
             ticket.setBooking(booking);
             ticket.setSeatAvailability(sa);
-            ticket.setPrice(BigDecimal.valueOf(8)); // adjust if dynamic
+            ticket.setPrice(BigDecimal.valueOf(ticketPrice)); // adjust if dynamic
             ticket.setStatus(TicketStatus.PENDING); // status εισιτηρίου (όχι πληρωμής)
             tickets.add(ticket);
         }
@@ -202,6 +211,120 @@ public class BookingService {
         return dto;
     }
 
+    @Transactional
+    public BookingValidationResponse validateAndCollect(String bookingCode) {
+        BookingValidationResponse resp = new BookingValidationResponse();
+        resp.setBookingCode(bookingCode);
+
+        Booking booking = bookingRepository.findOneWithDetailsByBookingCode(bookingCode);
+        if (booking == null) {
+            resp.setValid(false);
+            resp.setStatus(BookingValidationResponse.Status.INVALID_NOT_FOUND);
+            resp.setMessage("Booking not found.");
+            return resp;
+        }
+
+        resp.setBookingId(booking.getId());
+        int total = (booking.getTickets() == null) ? 0 : booking.getTickets().size();
+        resp.setTotalTickets(total);
+
+        // 1) Πληρωμή πρέπει να έχει SUCCEEDED
+        if (booking.getPaymentStatus() != PaymentStatus.SUCCEEDED) {
+            resp.setValid(false);
+            resp.setStatus(BookingValidationResponse.Status.INVALID_PAYMENT);
+            resp.setMessage("Payment not completed for this booking.");
+            return resp;
+        }
+
+        // 2) Πληροφορίες Screening (με LocalDate + LocalTime)
+        Screening screening = extractScreening(booking);
+        if (screening != null) {
+            resp.setScreeningId(screening.getId());
+            if (screening.getMovie() != null) {
+                resp.setMovieTitle(screening.getMovie().getTitle());
+            }
+            if (screening.getAuditorium() != null) {
+                resp.setAuditoriumName(screening.getAuditorium().getName());
+            }
+            resp.setDate(screening.getDate());
+            resp.setStartTime(screening.getStartTime());
+            resp.setEndTime(screening.getEndTime());
+
+            // 3) Χρονικό παράθυρο εγκυρότητας με βάση date+time
+            LocalDate date = screening.getDate();
+            LocalTime st = screening.getStartTime();
+            LocalTime et = screening.getEndTime();
+
+            LocalDateTime startDateTime = (date != null && st != null) ? LocalDateTime.of(date, st) : null;
+            LocalDateTime endDateTime   = (date != null && et != null) ? LocalDateTime.of(date, et) : null;
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime earliest = (startDateTime != null) ? startDateTime.minusMinutes(minutesBefore) : null;
+            LocalDateTime latest   = (endDateTime   != null) ? endDateTime.plusMinutes(minutesAfter)   : null;
+
+            boolean timeOk = true;
+            if (earliest != null && now.isBefore(earliest)) timeOk = false;
+            if (latest   != null && now.isAfter(latest))     timeOk = false;
+
+            if (!timeOk) {
+                resp.setValid(false);
+                resp.setStatus(BookingValidationResponse.Status.INVALID_TIME_WINDOW);
+                resp.setMessage("Booking is outside the allowed validation window.");
+                return resp;
+            }
+        }
+
+        // 4) Καταστάσεις εισιτηρίων
+        int alreadyCollected = 0;
+        int cancelled = 0;
+        if (booking.getTickets() != null) {
+            for (Ticket t : booking.getTickets()) {
+                if (t.getStatus() == TicketStatus.CANCELLED) cancelled++;
+                else if (t.getStatus() == TicketStatus.COLLECTED) alreadyCollected++;
+            }
+        }
+
+        if (total > 0 && alreadyCollected == total) {
+            resp.setValid(false);
+            resp.setStatus(BookingValidationResponse.Status.INVALID_ALREADY_COLLECTED);
+            resp.setMessage("All tickets are already collected.");
+            return resp;
+        }
+
+        if (alreadyCollected > 0 || cancelled > 0) {
+            resp.setValid(false);
+            resp.setStatus(BookingValidationResponse.Status.INVALID_PARTIALLY_USED);
+            resp.setMessage("Some tickets are already collected or cancelled.");
+            return resp;
+        }
+
+        // 5) Συλλογή εισιτηρίων
+        int collectedNow = 0;
+        if (booking.getTickets() != null) {
+            for (Ticket t : booking.getTickets()) {
+                if (t.getStatus() == TicketStatus.PENDING || t.getStatus() == TicketStatus.UNCOLLECTED) {
+                    t.setStatus(TicketStatus.COLLECTED);
+                    collectedNow++;
+                }
+            }
+        }
+
+        resp.setCollectedNow(collectedNow);
+        resp.setValid(true);
+        resp.setStatus(BookingValidationResponse.Status.VALID_COLLECTED);
+        resp.setMessage("Booking validated. Tickets collected: " + collectedNow + "/" + total);
+        return resp;
+    }
+
+    // === helpers ===
+    private Screening extractScreening(Booking booking) {
+        if (booking.getTickets() == null || booking.getTickets().isEmpty()) return null;
+        Ticket first = booking.getTickets().get(0);
+        if (first.getSeatAvailability() == null) return null;
+        return first.getSeatAvailability().getScreening();
+    }
+
+
     private static BookingDTO.ScreeningInfo getScreeningInfo(Screening screening) {
         BookingDTO.ScreeningInfo si = new BookingDTO.ScreeningInfo();
         si.setId(screening.getId());
@@ -223,6 +346,9 @@ public class BookingService {
         }
         return si;
     }
+
+
+
 
 //    @Transactional
 //    public CreditNote cancelTickets(String bookingCode, long user_id) {
